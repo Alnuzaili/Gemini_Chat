@@ -18,10 +18,12 @@ genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 model = genai.GenerativeModel("gemini-1.5-flash")
 
 ALLOWED_MIME_TYPES = {
-    "application/pdf", "application/x-javascript", "text/javascript",
-    "application/x-python", "text/x-python", "text/plain", "text/html",
+    "application/pdf", "application/x-javascript", "application/x-python",
+    "text/javascript", "text/x-python", "text/plain", "text/html",
     "text/css", "text/md", "text/csv", "text/xml", "text/rtf",
-    "image/jpeg", "image/png", "image/gif"
+    "image/jpeg", "image/png", "image/gif", "image/webp", "image/heic", "image/heif",
+    "video/mp4","video/mpeg","video/mov","video/avi","video/x-flv","video/mpg","video/webm","video/wmv","video/3gpp",
+    "audio/wav", "audio/mp3", "audio/aiff", "audio/aac", "audio/ogg", "audio/flac"
 }
 
 def allowed_file(filename):
@@ -41,12 +43,12 @@ def index():
             if allowed_file(file.filename):
                 file_path = os.path.join(app.config["UPLOAD_FOLDER"], file.filename)
                 file.save(file_path)
-                if file.mimetype.startswith("image"):
-                    organ = PIL.Image.open(file)
-                    response = model.generate_content([prompt, organ])
-                else:
-                    file_to_upload = genai.upload_file(file_path)
-                    response = model.generate_content([prompt, file_to_upload])
+                # if file.mimetype.startswith("image"):
+                #     organ = PIL.Image.open(file)
+                #     response = model.generate_content([prompt, organ])
+                # else:
+                file_to_upload = genai.upload_file(file_path)
+                response = model.generate_content([prompt, file_to_upload])
                 gemini_response = response.text
                 gemini_response = markdown.markdown(gemini_response)
             else:
