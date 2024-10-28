@@ -16,6 +16,12 @@ genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
 model = genai.GenerativeModel("gemini-1.5-flash")
 
+ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png", "gif"}
+
+def allowed_file(filename):
+    # Check if the file has one of the allowed extensions
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 @app.route("/", methods=["GET","POST"])
 def index():
@@ -25,12 +31,14 @@ def index():
         prompt = request.form.get("prompt", "")
         image = request.files.get("file")
 
-        # Mock Gemini response for example purposes
-        organ = PIL.Image.open(image)
-        response = model.generate_content([prompt, organ])
-        gemini_response = response.text
-        gemini_response = markdown.markdown(gemini_response)
-        
+        if allowed_file(image.filename):
+            # Mock Gemini response for example purposes
+            organ = PIL.Image.open(image)
+            response = model.generate_content([prompt, organ])
+            gemini_response = response.text
+            gemini_response = markdown.markdown(gemini_response)
+        else:
+            gemini_response = "File type not allowed. Please upload an image file."
         if image:
             image_path = os.path.join(app.config["UPLOAD_FOLDER"], image.filename)
             image.save(image_path)
