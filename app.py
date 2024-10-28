@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 from markupsafe import escape
 import markdown
+import PIL.Image
 
 app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = "uploads/"
@@ -14,8 +15,6 @@ load_dotenv()
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
 model = genai.GenerativeModel("gemini-1.5-flash")
-# response = model.generate_content("Write a story about a magic backpack.")
-# print(response)
 
 
 @app.route("/", methods=["GET","POST"])
@@ -27,7 +26,8 @@ def index():
         image = request.files.get("file")
 
         # Mock Gemini response for example purposes
-        response = model.generate_content(prompt)
+        organ = PIL.Image.open(image)
+        response = model.generate_content([prompt, organ])
         gemini_response = response.text
         gemini_response = markdown.markdown(gemini_response)
         
